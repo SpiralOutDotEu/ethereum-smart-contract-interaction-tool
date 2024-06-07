@@ -15,9 +15,11 @@ const MasterPage: React.FC = () => {
 
   const handleABIUpload = (uploadedAbi: any) => {
     setAbi(uploadedAbi);
+    setWarning(null);
   };
 
-  const handleAddressChange = (address: string) => {
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value;
     setContractAddress(address);
     if (provider && abi.length > 0) {
       provider.getSigner().then(signer => {
@@ -56,7 +58,7 @@ const MasterPage: React.FC = () => {
       if (item.type === 'function') {
         const functionType = item.stateMutability === 'view' || item.stateMutability === 'pure' ? 'Read' : 'Write';
         return (
-          <Accordion key={item.name} className="accordion">
+          <Accordion key={item.name} className="accordion" sx={{ marginTop: 2 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} className="accordion-summary">
               <Typography>{`${functionType} Function: ${item.name}`}</Typography>
             </AccordionSummary>
@@ -82,6 +84,18 @@ const MasterPage: React.FC = () => {
     });
   };
 
+  const handleReset = () => {
+    setAbi([]);
+    setContract(null);
+    setResults({});
+    setWarning(null);
+    setContractAddress('');
+  };
+
+  const handleWalletConnected = (address: string, network: string) => {
+    // Logic to handle wallet connection
+  };
+
   useEffect(() => {
     if (window.ethereum) {
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -94,26 +108,26 @@ const MasterPage: React.FC = () => {
       <AppBar position="static" sx={{ marginBottom: 3 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Smart Contract ABI Interactor
+            Fast Smart Contract Explorer 
           </Typography>
-          <WalletConnectButton />
+          <WalletConnectButton onWalletConnected={handleWalletConnected} />
         </Toolbar>
       </AppBar>
       <Box sx={{ padding: 2 }}>
         <Typography variant="h5" sx={{ marginBottom: 2 }}>
-          Smart Contract ABI Interactor
+          Interact with any smart contract
         </Typography>
-        <Typography variant="body1" className="description">
+        <Typography variant="body1" className="description" sx={{ marginBottom: 2 }}>
           This app allows you to interact with Ethereum smart contracts by uploading their ABI and connecting to your wallet. 
           You can call read and write functions on the contract directly from this interface.
         </Typography>
-        <ABIUploader onUpload={handleABIUpload} onAddressSubmit={handleAddressChange} warning={warning} />
+        <ABIUploader onUpload={handleABIUpload} warning={warning} reset={handleReset} />
         <TextField
           label="Contract Address"
           fullWidth
           variant="outlined"
           value={contractAddress}
-          onChange={(e) => handleAddressChange(e.target.value)}
+          onChange={handleAddressChange}
           sx={{ marginBottom: 2 }}
         />
         {warning && <Alert severity="warning">{warning}</Alert>}
