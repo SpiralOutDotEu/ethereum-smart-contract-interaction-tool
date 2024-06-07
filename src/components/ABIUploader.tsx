@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Box, Button, Typography, TextField, Alert, Paper, Chip } from '@mui/material';
-import { UploadFile as UploadFileIcon } from '@mui/icons-material';
+import React, { useState } from "react";
+import { useDropzone } from "react-dropzone";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Alert,
+  Paper,
+  Chip,
+} from "@mui/material";
+import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 
 interface ABIUploaderProps {
   onUpload: (abi: any) => void;
@@ -9,9 +17,13 @@ interface ABIUploaderProps {
   reset: () => void;
 }
 
-const ABIUploader: React.FC<ABIUploaderProps> = ({ onUpload, warning, reset }) => {
+const ABIUploader: React.FC<ABIUploaderProps> = ({
+  onUpload,
+  warning,
+  reset,
+}) => {
   const [fileContent, setFileContent] = useState<string | null>(null);
-  const [abiText, setAbiText] = useState<string>('');
+  const [abiText, setAbiText] = useState<string>("");
 
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -39,26 +51,37 @@ const ABIUploader: React.FC<ABIUploaderProps> = ({ onUpload, warning, reset }) =
 
   const handleReset = () => {
     setFileContent(null);
-    setAbiText('');
+    setAbiText("");
     reset();
   };
 
   return (
-    <Box sx={{ textAlign: 'center', marginBottom: 3 }}>
+    <Box sx={{ textAlign: "center", marginBottom: 3 }}>
       {fileContent || abiText ? (
         <Box>
           <Chip label="ABI loaded" color="success" sx={{ marginBottom: 2 }} />
           <Typography>Press the button below to replace the ABI</Typography>
-          <Button variant="contained" onClick={handleReset} sx={{ marginTop: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleReset}
+            sx={{ marginTop: 2 }}
+          >
             Reset ABI
           </Button>
         </Box>
       ) : (
         <Box>
-          <Paper {...getRootProps()} className="dropzone" elevation={3} sx={{ padding: 3, cursor: 'pointer' }}>
+          <Paper
+            {...getRootProps()}
+            className="dropzone"
+            elevation={3}
+            sx={{ padding: 3, cursor: "pointer" }}
+          >
             <input {...getInputProps()} />
             <UploadFileIcon fontSize="large" color="primary" />
-            <Typography variant="h6" sx={{ marginBottom: 1 }}>Drag & drop ABI file here, or click to select file</Typography>
+            <Typography variant="h6" sx={{ marginBottom: 1 }}>
+              Drag & drop ABI file here, or click to select file
+            </Typography>
           </Paper>
           <TextField
             label="Paste ABI JSON here"
@@ -72,7 +95,11 @@ const ABIUploader: React.FC<ABIUploaderProps> = ({ onUpload, warning, reset }) =
           />
         </Box>
       )}
-      {warning && <Alert severity="warning" sx={{ marginTop: 2 }}>{warning}</Alert>}
+      {warning && (
+        <Alert severity="warning" sx={{ marginTop: 2 }}>
+          {warning}
+        </Alert>
+      )}
     </Box>
   );
 };
