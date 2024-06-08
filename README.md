@@ -1,46 +1,51 @@
-# Getting Started with Create React App
+# Ethereum Smart Contract Interaction Tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This application allows you to interact with Ethereum smart contracts by uploading their ABI, connecting to your wallet, and calling read and write functions on the contract directly from this interface. Additionally, you can generate a React component for your ABI to copy or download.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Smart Contract Interaction**: Upload ABI and interact with Ethereum smart contracts.
+- **Code Generation**: Generate React components based on the provided ABI.
 
-### `npm start`
+## Preview
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Main Interface
+![Main Interface](public/EthereumSmartContractInteraction.png)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Call Function
+![Call Function](public/EthereumSmartContractInteraction_call.png)
 
-### `npm test`
+### Code Generation
+![Code Generation](public/EthereumSmartContractInteraction_code.png)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- [Node.js](https://nodejs.org/) (v14 or later)
+- [Yarn](https://yarnpkg.com/)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Steps
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Clone the repository:**
 
-### `npm run eject`
+    ```sh
+    git clone https://github.com/SpiralOutDotEu/ethereum-smart-contract-interaction-tool
+    cd ethereum-smart-contract-interaction-tool
+    ```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+2. **Install dependencies:**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    ```sh
+    yarn install
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+3. **Run the application:**
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    ```sh
+    yarn start
+    ```
 
-## Learn More
+4. **Open the application:**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+    Open your browser and navigate to [http://localhost:3000](http://localhost:3000).
