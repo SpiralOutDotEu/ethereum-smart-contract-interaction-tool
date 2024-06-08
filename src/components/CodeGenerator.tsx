@@ -130,18 +130,38 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ abi }) => {
     code += `  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);\n`;
     code += `  const [signer, setSigner] = useState<ethers.Signer | null>(null);\n`;
     code += `  const [contract, setContract] = useState<ethers.Contract | null>(null);\n`;
-    code += `  const [results, setResults] = useState<Record<string, any>>({});\n\n`;
+    code += `  const [results, setResults] = useState<Record<string, any>>({});\n`;
+    code += `  const [walletAddress, setWalletAddress] = useState<string>("");\n\n`;
+
     code += `  useEffect(() => {\n`;
     code += `    if (window.ethereum) {\n`;
     code += `      const provider = new ethers.BrowserProvider(window.ethereum);\n`;
     code += `      setProvider(provider);\n`;
     code += `      provider.getSigner().then(signer => {\n`;
     code += `        setSigner(signer);\n`;
+    code += `        signer.getAddress().then(address => {\n`;
+    code += `          setWalletAddress(address);\n`;
+    code += `        });\n`;
     code += `        const contractInstance = new ethers.Contract(contractAddress, abi, signer);\n`;
     code += `        setContract(contractInstance);\n`;
     code += `      });\n`;
+    code += `    } else {\n`;
+    code += `      alert('No wallet found. Please install MetaMask.');\n`;
     code += `    }\n`;
     code += `  }, [contractAddress]);\n\n`;
+
+    code += `  const connectWallet = async () => {\n`;
+    code += `    if (window.ethereum) {\n`;
+    code += `      try {\n`;
+    code += `        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });\n`;
+    code += `        setWalletAddress(accounts[0]);\n`;
+    code += `      } catch (error) {\n`;
+    code += `        alert('Failed to connect wallet');\n`;
+    code += `      }\n`;
+    code += `    } else {\n`;
+    code += `      alert('No wallet found. Please install MetaMask.');\n`;
+    code += `    }\n`;
+    code += `  };\n\n`;
 
     abi.forEach((item) => {
       if (item.type === "function") {
@@ -160,7 +180,13 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ abi }) => {
         }(${item.inputs
           .map((input: { name: any; type: any }) => input.name)
           .join(", ")});\n`;
-        code += `        setResults((prevResults) => ({ ...prevResults, ${item.name}: result }));\n`;
+        code += `        if (result.wait) {\n`;
+        code += `          alert('Waiting for transaction confirmation...');\n`;
+        code += `          const tx = await result.wait();\n`;
+        code += `          setResults((prevResults) => ({ ...prevResults, ${item.name}: tx.logs }));\n`;
+        code += `        } else {\n`;
+        code += `          setResults((prevResults) => ({ ...prevResults, ${item.name}: result }));\n`;
+        code += `        }\n`;
         code += `      }\n`;
         code += `    } catch (error: any) {\n`;
         code += `      alert('Error: ' + error.message);\n`;
@@ -177,6 +203,9 @@ const CodeGenerator: React.FC<CodeGeneratorProps> = ({ abi }) => {
 
     code += `  return (\n`;
     code += `    <div>\n`;
+    code += `      <button onClick={connectWallet}>\n`;
+    code += `        {walletAddress ? \`Connected: \${walletAddress.slice(0, 6)}...\${walletAddress.slice(-4)}\` : 'Connect Wallet'}\n`;
+    code += `      </button>\n\n`;
     abi.forEach((item) => {
       if (item.type === "function") {
         code += `      <div>\n`;
