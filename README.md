@@ -7,6 +7,10 @@ This application allows you to interact with Ethereum smart contracts by uploadi
 - **Smart Contract Interaction**: Upload ABI and interact with Ethereum smart contracts.
 - **Code Generation**: Generate React components based on the provided ABI.
 
+## Try It Out
+
+You can use the deployed version of the application [here](https://ethereum-smart-contract-interaction-tool.vercel.app/).
+
 ## Preview
 
 ### Main Interface
