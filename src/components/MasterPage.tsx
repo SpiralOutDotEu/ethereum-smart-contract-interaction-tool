@@ -79,7 +79,6 @@ const MasterPage: React.FC = () => {
       const result = await contract[func.name](...args);
 
       if (result.wait) {
-        alert("Waiting for transaction confirmation...");
         const receipt = await result.wait();
         setResults((prevResults) => ({
           ...prevResults,
@@ -186,7 +185,7 @@ const MasterPage: React.FC = () => {
     setContractAddress("");
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (window.ethereum) {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
