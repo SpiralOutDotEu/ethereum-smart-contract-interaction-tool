@@ -211,14 +211,14 @@ const MasterPage: React.FC = () => {
       </AppBar>
       <Box sx={{ padding: 2 }}>
         <Typography variant="h5" sx={{ marginBottom: 2 }}>
-          Interact with Ethereum Smart Contracts
+          Interact with Ethereum Smart Contracts and Generate Code
         </Typography>
         <Typography
           variant="body1"
           className="description"
           sx={{ marginBottom: 2 }}
         >
-          This application allows you to interact with Ethereum smart contracts by uploading their ABI, connecting to your wallet, and calling read and write functions on the contract directly from this interface.
+          This application allows you to interact with Ethereum smart contracts by uploading their ABI, connecting to your wallet, and calling read and write functions on the contract directly from this interface. Additionally, you can generate a React component for your ABI to copy or download.
         </Typography>
         <ABIUploader
           onUpload={handleABIUpload}
