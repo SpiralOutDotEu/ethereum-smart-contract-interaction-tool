@@ -14,9 +14,12 @@ import {
   AccordionDetails,
   Alert,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CodeGenerator from "./CodeGenerator";
+import Highlight from "react-highlight";
+import 'highlight.js/styles/github.css';
 
 const MasterPage: React.FC = () => {
   const [abi, setAbi] = useState<any[]>([]);
@@ -25,6 +28,17 @@ const MasterPage: React.FC = () => {
   const [warning, setWarning] = useState<string | null>(null);
   const [contractAddress, setContractAddress] = useState<string>("");
   const [results, setResults] = useState<{ [key: string]: any }>({});
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
+
+  const isErrorWithMessage = (error: unknown): error is Error => {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as Error).message === "string"
+    );
+  };
 
   const handleABIUpload = (uploadedAbi: any) => {
     setAbi(uploadedAbi);
@@ -44,9 +58,16 @@ const MasterPage: React.FC = () => {
 
   const handleFunctionCall = async (func: any) => {
     if (!contract) {
-      setWarning("Please enter a valid contract address");
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [func.name]: "Please enter a valid contract address",
+      }));
       return;
     }
+    setLoading((prevLoading) => ({ ...prevLoading, [func.name]: true }));
+    setErrors((prevErrors) => ({ ...prevErrors, [func.name]: null }));
+    setResults((prevResults) => ({ ...prevResults, [func.name]: null })); // Clear previous results
+
     try {
       const args = func.inputs.map((input: any, index: number) => {
         const value = (
@@ -54,20 +75,38 @@ const MasterPage: React.FC = () => {
         ).value;
         return func.inputs[index].type === "uint256" ? BigInt(value) : value;
       });
+
       const result = await contract[func.name](...args);
-      setResults((prevResults) => ({
-        ...prevResults,
-        [func.name]: JSON.stringify(result, (key, value) =>
-          typeof value === "bigint" ? value.toString() : value
-        ),
-      }));
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setWarning(error.message);
+
+      if (result.wait) {
+        alert("Waiting for transaction confirmation...");
+        const receipt = await result.wait();
+        setResults((prevResults) => ({
+          ...prevResults,
+          [func.name]: JSON.stringify(receipt, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value,
+          2),
+        }));
       } else {
-        setWarning("An unknown error occurred.");
+        setResults((prevResults) => ({
+          ...prevResults,
+          [func.name]: JSON.stringify(result, (key, value) =>
+            typeof value === "bigint" ? value.toString() : value,
+          2),
+        }));
+      }
+    } catch (error) {
+      if (isErrorWithMessage(error)) {
+        const errorMessage = error.message;
+        setErrors((prevErrors) => ({ ...prevErrors, [func.name]: errorMessage }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [func.name]: "An unknown error occurred.",
+        }));
       }
     }
+    setLoading((prevLoading) => ({ ...prevLoading, [func.name]: false }));
   };
 
   const renderComponents = () => {
@@ -108,10 +147,27 @@ const MasterPage: React.FC = () => {
                 >
                   Call {item.name}
                 </Button>
+                {loading[item.name] && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginTop: 2,
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                )}
+                {errors[item.name] && (
+                  <Alert severity="error" sx={{ marginTop: 2 }}>
+                    {errors[item.name]}
+                  </Alert>
+                )}
                 {results[item.name] && (
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    Result: {results[item.name]}
-                  </Typography>
+                  <Box className="result-box">
+                    <Typography variant="body1">Result:</Typography>
+                    <Highlight className="json">{results[item.name]}</Highlight>
+                  </Box>
                 )}
               </Box>
             </AccordionDetails>
@@ -138,6 +194,8 @@ const MasterPage: React.FC = () => {
     if (window.ethereum) {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
+    } else {
+      setWarning("No Ethereum provider found. Please install MetaMask.");
     }
   }, []);
 
@@ -146,23 +204,21 @@ const MasterPage: React.FC = () => {
       <AppBar position="static" sx={{ marginBottom: 3 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Fast Smart Contract Explorer
+            Ethereum Smart Contract Interaction Tool
           </Typography>
           <WalletConnectButton onWalletConnected={handleWalletConnected} />
         </Toolbar>
       </AppBar>
       <Box sx={{ padding: 2 }}>
         <Typography variant="h5" sx={{ marginBottom: 2 }}>
-          Interact with any smart contract
+          Interact with Ethereum Smart Contracts
         </Typography>
         <Typography
           variant="body1"
           className="description"
           sx={{ marginBottom: 2 }}
         >
-          This app allows you to interact with Ethereum smart contracts by
-          uploading their ABI and connecting to your wallet. You can call read
-          and write functions on the contract directly from this interface.
+          This application allows you to interact with Ethereum smart contracts by uploading their ABI, connecting to your wallet, and calling read and write functions on the contract directly from this interface.
         </Typography>
         <ABIUploader
           onUpload={handleABIUpload}
@@ -179,7 +235,10 @@ const MasterPage: React.FC = () => {
         />
         {warning && <Alert severity="warning">{warning}</Alert>}
         {abi.length > 0 && (
-           <Accordion className="code-generation-accordion" sx={{ marginTop: 2 }}>
+          <Accordion
+            className="code-generation-accordion"
+            sx={{ marginTop: 2 }}
+          >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Code Generation</Typography>
             </AccordionSummary>
