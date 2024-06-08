@@ -46,12 +46,13 @@ const WalletConnectButton: React.FC<{ onWalletConnected: (address: string, netwo
 
   return (
     <Box display="flex" alignItems="center">
-      <Button variant="contained" onClick={connectWallet} sx={{ marginRight: 2 }}>
-        {address ? formatAddress(address) : 'Connect Wallet'}
-      </Button>
       {network && (
         <Chip label={network} color="primary" />
       )}
+      <Button variant="contained" onClick={connectWallet} sx={{ marginRight: 2 }}>
+        {address ? formatAddress(address) : 'Connect Wallet'}
+      </Button>
+      
     </Box>
   );
 };
