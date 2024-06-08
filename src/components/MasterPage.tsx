@@ -186,11 +186,7 @@ const MasterPage: React.FC = () => {
     setContractAddress("");
   };
 
-  const handleWalletConnected = (address: string, network: string) => {
-    // Logic to handle wallet connection
-  };
-
-  useEffect(() => {
+   useEffect(() => {
     if (window.ethereum) {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
@@ -206,7 +202,7 @@ const MasterPage: React.FC = () => {
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Ethereum Smart Contract Interaction Tool
           </Typography>
-          <WalletConnectButton onWalletConnected={handleWalletConnected} />
+          <WalletConnectButton />
         </Toolbar>
       </AppBar>
       <Box sx={{ padding: 2 }}>
