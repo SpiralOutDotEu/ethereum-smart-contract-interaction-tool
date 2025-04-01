@@ -36,8 +36,7 @@ const MasterPage: React.FC = () => {
     return (
       typeof error === "object" &&
       error !== null &&
-      "message" in error &&
-      typeof (error as Error).message === "string"
+      "message" in error
     );
   };
 
@@ -103,7 +102,16 @@ const MasterPage: React.FC = () => {
         return func.inputs[index].type === "uint256" ? BigInt(value) : value;
       });
 
-      const result = await contract[func.name](...args);
+      // Check if the function is payable and set the transaction options
+      const isPayable = func.stateMutability === "payable";
+      const ethInput = document.getElementById(`${func.name}-eth`) as HTMLInputElement;
+      const overrides = isPayable && ethInput && ethInput.value
+          ? { value: ethers.parseEther(ethInput.value) }
+          : {};
+
+
+
+      const result = await contract[func.name](...args, overrides);
 
       if (result.wait) {
         const receipt = await result.wait();
@@ -142,6 +150,8 @@ const MasterPage: React.FC = () => {
           item.stateMutability === "view" || item.stateMutability === "pure"
             ? "Read"
             : "Write";
+        const isPayable = item.stateMutability === "payable";
+
         return (
           <Accordion
             key={item.name}
@@ -166,6 +176,24 @@ const MasterPage: React.FC = () => {
                     fullWidth
                   />
                 ))}
+                {/* ETH input field for payable functions */}
+                {isPayable && (
+                    <TextField
+                        label="ETH Value"
+                        type="number"
+                        id={`${item.name}-eth`}
+                        InputProps={{
+                          startAdornment: (
+                              <Typography sx={{ mr: 1 }}>ETH</Typography>
+                          ),
+                        }}
+                        helperText="Amount of ETH to send with this transaction"
+                        variant="outlined"
+                        margin="normal"
+                        fullWidth
+                    />
+                )}
+
                 <Button
                   variant="contained"
                   onClick={() => handleFunctionCall(item)}
