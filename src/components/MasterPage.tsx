@@ -25,6 +25,7 @@ const MasterPage: React.FC = () => {
   const [abi, setAbi] = useState<any[]>([]);
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [contractAddress, setContractAddress] = useState<string>("");
   const [results, setResults] = useState<{ [key: string]: any }>({});
@@ -52,18 +53,44 @@ const MasterPage: React.FC = () => {
       provider.getSigner().then((signer) => {
         const contractInstance = new ethers.Contract(address, abi, signer);
         setContract(contractInstance);
+        setSigner(signer);
       });
     }
   };
 
   const handleFunctionCall = async (func: any) => {
-    if (!contract) {
+    if (!abi.length) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [func.name]: "Please upload a valid ABI",
+      }));
+      return;
+    }
+
+    if (!contractAddress) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [func.name]: "Please enter a valid contract address",
       }));
       return;
     }
+
+    if (!provider) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [func.name]: "Please connect your wallet",
+      }));
+      return;
+    }
+
+    if (!contract) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [func.name]: "Contract not set. Please check the ABI and contract address",
+      }));
+      return;
+    }
+
     setLoading((prevLoading) => ({ ...prevLoading, [func.name]: true }));
     setErrors((prevErrors) => ({ ...prevErrors, [func.name]: null }));
     setResults((prevResults) => ({ ...prevResults, [func.name]: null })); // Clear previous results
@@ -189,6 +216,7 @@ const MasterPage: React.FC = () => {
     if (window.ethereum) {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
+      provider.getSigner().then((signer) => setSigner(signer));
     } else {
       setWarning("No Ethereum provider found. Please install MetaMask.");
     }
